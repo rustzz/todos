@@ -14,7 +14,12 @@ class User:
         self.password = password
         self.token = token
         return
-    
+
+    def is_none(self, data) -> bool:
+        if data is None:
+            return True
+        return False
+
     async def user_exists(self) -> bool:
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
         sql = 'SELECT COUNT(*) FROM users WHERE username=?;'
@@ -46,8 +51,10 @@ class User:
         return False
 
     async def login(self) -> dict:
+        if self.is_none(self.username) or self.is_none(self.password):
+            return {'status': False, 'reason': f'Одно из параметров имеет <null> тип'}
         if not await self.user_exists():
-            return {'status': False, 'reason': 'Имя пользователя не существует'}
+            return {'status': False, 'reason': 'Данного имени пользователя не существует'}
         if not await self.is_valid_password():
             return {'status': False, 'reason': 'Пароль не верный'}
 
@@ -60,6 +67,8 @@ class User:
         return {'status': True, 'token': token}
 
     async def register(self) -> dict:
+        if self.is_none(self.username) or self.is_none(self.password):
+            return {'status': False, 'reason': f'Одно из параметров имеет <null> тип'}
         if await self.user_exists():
             return {'status': False, 'reason': 'Имя пользователя занято'}
 

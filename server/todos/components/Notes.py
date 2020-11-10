@@ -11,7 +11,14 @@ class Notes:
         self.data = data
         return
 
+    def is_none(self, data) -> bool:
+        if data is None:
+            return True
+        return False
+
     async def delete(self) -> dict:
+        if self.is_none(self.user.username) or self.is_none(self.user.token):
+            return {'status': False, 'reason': f'Одно из параметров имеет <null> тип'}
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
         sql = 'DELETE FROM notes WHERE id=? AND owner=?;'
         cursor.execute(sql, (self.data["note_id"], self.user.username))
@@ -20,6 +27,8 @@ class Notes:
         return {'status': True}
 
     async def get(self) -> dict:
+        if self.is_none(self.user.username) or self.is_none(self.user.token):
+            return {'status': False, 'reason': f'Одно из параметров имеет <null> тип'}
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
         sql = 'SELECT * FROM notes WHERE owner=?;'
         cursor.execute(sql, (self.user.username,))
@@ -31,6 +40,8 @@ class Notes:
         return {'status': True, 'notes': notes}
 
     async def update(self) -> dict:
+        if self.is_none(self.user.username) or self.is_none(self.user.token):
+            return {'status': False, 'reason': f'Одно из параметров имеет <null> тип'}
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
         sql = 'UPDATE notes SET hash=?,title=?,text=?,checked=? WHERE owner=? AND id=?;'
         cursor.execute(sql, (
@@ -46,6 +57,8 @@ class Notes:
         return {'status': True}
 
     async def add(self) -> dict:
+        if self.is_none(self.username) or self.is_none(self.password):
+            return {'status': False, 'reason': f'Одно из параметров имеет <null> тип'}
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
         sql = 'INSERT INTO notes (owner, parent) VALUES (?, ?);'
         cursor.execute(sql, (self.user.username, 0))
