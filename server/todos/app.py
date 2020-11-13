@@ -7,7 +7,7 @@ from todos.components.Notes import Notes
 from todos.components.User import User
 
 
-app = FastAPI()
+app = FastAPI(debug=True)
 origins = [
     '*',
 ]
@@ -23,6 +23,7 @@ app.add_middleware(
 @app.get('/')
 async def root():
     return 'Документации пока нет'
+
 
 @app.post('/am/register')
 async def am_register(username: str = Query(None, min_length=4, max_length=15),
