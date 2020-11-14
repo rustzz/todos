@@ -18,11 +18,16 @@ class Notebook:
         if self.is_none(self.user.username) or self.is_none(self.user.token):
             return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
-        sql = "DELETE FROM notes WHERE id=? AND owner=?;"
+        sql = "SELECT COUNT(*) FROM notes WHERE id=? AND owner=?;"
         cursor.execute(sql, (self.data.note_id, self.user.username))
-        conn.commit()
-        conn.close()
-        return {"status": True}
+        result = cursor.fetchall()
+        if fix_data(result[0][0]):
+            sql = "DELETE FROM notes WHERE id=? AND owner=?;"
+            cursor.execute(sql, (self.data.note_id, self.user.username))
+            conn.commit()
+            conn.close()
+            return {"status": True}
+        return {"status": False, "reason": "Заметка не существует"}
 
     async def get(self) -> dict:
         if self.is_none(self.user.username) or self.is_none(self.user.token):
@@ -62,7 +67,7 @@ class Notebook:
         cursor.execute(sql, (self.user.username, 0))
         sql = "SELECT MAX(id) FROM notes WHERE owner=?;"
         cursor.execute(sql, (self.user.username,))
-        note_id = cursor.fetchall()
+        result = cursor.fetchall()
         conn.commit()
         conn.close()
-        return {"status": True, "note_id": fix_data(note_id[0][0])}
+        return {"status": True, "note_id": fix_data(result[0][0])}

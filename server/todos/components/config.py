@@ -1,6 +1,6 @@
 import os
 
-
+app_title = "Todos App"
 mysql_data = {
     'user': os.getenv("MYSQL_USER"),
     'password': os.getenv("MYSQL_PASSWORD"),

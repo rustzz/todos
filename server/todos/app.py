@@ -11,6 +11,7 @@ from todos.models import Notebook as NotebookModels
 
 
 app = FastAPI(debug=True)
+app.title = config.app_title
 origins = [
     "*",
 ]
@@ -25,19 +26,19 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return "Документации пока нет"
+    return "https://github.com/rustzz/todos"
 
 
-@app.post("/am/register")
-async def am_register(user: UserModels.User = Depends()):
+@app.post("/am/signup")
+async def am_signup(user: UserModels.User = Depends()):
     _user = User((connect, config), user=user)
-    return await _user.register()
+    return await _user.signup()
 
 
-@app.post("/am/login")
-async def am_login(user: UserModels.User = Depends()):
+@app.post("/am/signin")
+async def am_signin(user: UserModels.User = Depends()):
     _user = User((connect, config), user=user)
-    return await _user.login()
+    return await _user.signin()
 
 
 @app.post("/notebook/add")

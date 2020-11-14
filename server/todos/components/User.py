@@ -1,6 +1,7 @@
 import hashlib
 import random
 from todos.components.fixes import fix_data
+import uuid
 
 
 class User:
@@ -44,7 +45,7 @@ class User:
             return True
         return False
 
-    async def login(self) -> dict:
+    async def signin(self) -> dict:
         if self.is_none(self.user.username) or self.is_none(self.user.password):
             return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         if not await self.user_exists():
@@ -54,13 +55,13 @@ class User:
 
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
         sql = "UPDATE users SET token=? WHERE username=?;"
-        token = hashlib.sha256(str(random.randint(100000, 999999)).encode()).hexdigest()
+        token = hashlib.sha256(uuid.uuid4().hex.encode()).hexdigest()
         cursor.execute(sql, (token, self.user.username))
         conn.commit()
         conn.close()
         return {"status": True, "token": token}
 
-    async def register(self) -> dict:
+    async def signup(self) -> dict:
         if self.is_none(self.user.username) or self.is_none(self.user.password):
             return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         if await self.user_exists():
@@ -68,7 +69,7 @@ class User:
 
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
         sql = "INSERT INTO users (username, password, token) VALUES (?, ?, ?);"
-        token = hashlib.sha256(str(random.randint(100000, 999999)).encode()).hexdigest()
+        token = hashlib.sha256(uuid.uuid4().hex.encode()).hexdigest()
         cursor.execute(sql, (self.user.username, hashlib.sha256(self.user.password.encode()).hexdigest(), token))
         conn.commit()
         conn.close()
