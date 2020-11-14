@@ -4,15 +4,9 @@ from todos.components.fixes import fix_data
 
 
 class User:
-    username: str = None
-    password: str = None
-    token: str = None
-
-    def __init__(self, connection, username: str, password: str = None, token: str = None) -> None:
+    def __init__(self, connection, user) -> None:
         self.connection = connection
-        self.username = username
-        self.password = password
-        self.token = token
+        self.user = user
         return
 
     def is_none(self, data) -> bool:
@@ -22,8 +16,8 @@ class User:
 
     async def user_exists(self) -> bool:
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
-        sql = 'SELECT COUNT(*) FROM users WHERE username=?;'
-        cursor.execute(sql, (self.username,))
+        sql = "SELECT COUNT(*) FROM users WHERE username=?;"
+        cursor.execute(sql, (self.user.username,))
         result = cursor.fetchall()
         conn.close()
         if fix_data(result[0][0]) > 0:
@@ -32,50 +26,50 @@ class User:
 
     async def is_valid_password(self) -> bool:
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
-        sql = 'SELECT password FROM users WHERE username=?;'
-        cursor.execute(sql, (self.username,))
+        sql = "SELECT password FROM users WHERE username=?;"
+        cursor.execute(sql, (self.user.username,))
         result = cursor.fetchall()
         conn.close()
-        if fix_data(result[0][0]) == hashlib.sha256(self.password.encode()).hexdigest():
+        if fix_data(result[0][0]) == hashlib.sha256(self.user.password.encode()).hexdigest():
             return True
         return False
 
     async def is_valid_token(self) -> bool:
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
-        sql = 'SELECT token FROM users WHERE username=?;'
-        cursor.execute(sql, (self.username,))
+        sql = "SELECT token FROM users WHERE username=?;"
+        cursor.execute(sql, (self.user.username,))
         result = cursor.fetchall()
         conn.close()
-        if fix_data(result[0][0]) == self.token:
+        if fix_data(result[0][0]) == self.user.token:
             return True
         return False
 
     async def login(self) -> dict:
-        if self.is_none(self.username) or self.is_none(self.password):
-            return {'status': False, 'reason': f'Одно из параметров имеет <null> тип'}
+        if self.is_none(self.user.username) or self.is_none(self.user.password):
+            return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         if not await self.user_exists():
-            return {'status': False, 'reason': 'Данного имени пользователя не существует'}
+            return {"status": False, "reason": "Данного имени пользователя не существует"}
         if not await self.is_valid_password():
-            return {'status': False, 'reason': 'Пароль не верный'}
+            return {"status": False, "reason": "Пароль не верный"}
 
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
-        sql = 'UPDATE users SET token=? WHERE username=?;'
+        sql = "UPDATE users SET token=? WHERE username=?;"
         token = hashlib.sha256(str(random.randint(100000, 999999)).encode()).hexdigest()
-        cursor.execute(sql, (token, self.username))
+        cursor.execute(sql, (token, self.user.username))
         conn.commit()
         conn.close()
-        return {'status': True, 'token': token}
+        return {"status": True, "token": token}
 
     async def register(self) -> dict:
-        if self.is_none(self.username) or self.is_none(self.password):
-            return {'status': False, 'reason': f'Одно из параметров имеет <null> тип'}
+        if self.is_none(self.user.username) or self.is_none(self.user.password):
+            return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         if await self.user_exists():
-            return {'status': False, 'reason': 'Имя пользователя занято'}
+            return {"status": False, "reason": "Имя пользователя занято"}
 
         conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
-        sql = 'INSERT INTO users (username, password, token) VALUES (?, ?, ?);'
+        sql = "INSERT INTO users (username, password, token) VALUES (?, ?, ?);"
         token = hashlib.sha256(str(random.randint(100000, 999999)).encode()).hexdigest()
-        cursor.execute(sql, (self.username, hashlib.sha256(self.password.encode()).hexdigest(), token))
+        cursor.execute(sql, (self.user.username, hashlib.sha256(self.user.password.encode()).hexdigest(), token))
         conn.commit()
         conn.close()
-        return {'status': True}
+        return {"status": True}
