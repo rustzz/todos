@@ -16,7 +16,7 @@ class User:
         return False
 
     async def user_exists(self) -> bool:
-        conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
+        conn, cursor = self.connection.connect_mysql()
         sql = "SELECT COUNT(*) FROM users WHERE username=?;"
         cursor.execute(sql, (self.user.username,))
         result = cursor.fetchall()
@@ -26,7 +26,7 @@ class User:
         return False
 
     async def is_valid_password(self) -> bool:
-        conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
+        conn, cursor = self.connection.connect_mysql()
         sql = "SELECT password FROM users WHERE username=?;"
         cursor.execute(sql, (self.user.username,))
         result = cursor.fetchall()
@@ -36,7 +36,7 @@ class User:
         return False
 
     async def is_valid_token(self) -> bool:
-        conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
+        conn, cursor = self.connection.connect_mysql()
         sql = "SELECT token FROM users WHERE username=?;"
         cursor.execute(sql, (self.user.username,))
         result = cursor.fetchall()
@@ -53,7 +53,7 @@ class User:
         if not await self.is_valid_password():
             return {"status": False, "reason": "Пароль не верный"}
 
-        conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
+        conn, cursor = self.connection.connect_mysql()
         sql = "UPDATE users SET token=? WHERE username=?;"
         token = hashlib.sha256(uuid.uuid4().hex.encode()).hexdigest()
         cursor.execute(sql, (token, self.user.username))
@@ -67,7 +67,7 @@ class User:
         if await self.user_exists():
             return {"status": False, "reason": "Имя пользователя занято"}
 
-        conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
+        conn, cursor = self.connection.connect_mysql()
         sql = "INSERT INTO users (username, password, token) VALUES (?, ?, ?);"
         token = hashlib.sha256(uuid.uuid4().hex.encode()).hexdigest()
         cursor.execute(sql, (self.user.username, hashlib.sha256(self.user.password.encode()).hexdigest(), token))

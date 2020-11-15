@@ -17,7 +17,7 @@ class Notebook:
     async def delete(self) -> dict:
         if self.is_none(self.user.username) or self.is_none(self.user.token):
             return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
-        conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
+        conn, cursor = self.connection.connect_mysql()
         sql = "SELECT COUNT(*) FROM notes WHERE id=? AND owner=?;"
         cursor.execute(sql, (self.data.note_id, self.user.username))
         result = cursor.fetchall()
@@ -32,7 +32,7 @@ class Notebook:
     async def get(self) -> dict:
         if self.is_none(self.user.username) or self.is_none(self.user.token):
             return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
-        conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
+        conn, cursor = self.connection.connect_mysql()
         sql = "SELECT * FROM notes WHERE owner=?;"
         cursor.execute(sql, (self.user.username,))
         result = cursor.fetchall()
@@ -45,7 +45,7 @@ class Notebook:
     async def update(self) -> dict:
         if self.is_none(self.user.username) or self.is_none(self.user.token):
             return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
-        conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
+        conn, cursor = self.connection.connect_mysql()
         sql = "UPDATE notes SET hash=?,title=?,text=?,checked=? WHERE owner=? AND id=?;"
         cursor.execute(sql, (
             hashlib.sha256(str(self.data).encode()).hexdigest(),
@@ -62,7 +62,7 @@ class Notebook:
     async def add(self) -> dict:
         if self.is_none(self.user.username) or self.is_none(self.user.token):
             return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
-        conn, cursor = self.connection[0].connect_mysql(self.connection[1].mysql_data)
+        conn, cursor = self.connection.connect_mysql()
         sql = "INSERT INTO notes (owner, parent) VALUES (?, ?);"
         cursor.execute(sql, (self.user.username, 0))
         sql = "SELECT MAX(id) FROM notes WHERE owner=?;"

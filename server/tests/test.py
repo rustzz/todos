@@ -3,7 +3,7 @@ import uuid
 import json
 import random
 
-host = "http://127.0.0.1:8000"
+host = "http://0.0.0.0:8000"
 
 
 class Auth:
@@ -100,7 +100,7 @@ class Notebook:
             "note_id": note["note_id"], "title": note["title"],
             "text": note["text"], "checked": note["checked"]
         }
-        response = requests.post(f"{host}/am/signup", params=params, data=json.dumps(data))
+        response = requests.post(f"{host}/notebook/update", params=params, data=json.dumps(data))
         print(response.status_code)
         print(response.text)
         if response.status_code == 200:
@@ -121,6 +121,8 @@ notebook = Notebook(auth)
 notebook.get()
 notebook.add()
 notebook.add()
+notebook.get()
+notebook.update({"note_id": random.choice(list(notebook.notes.keys())), "text": "...", "title": "......", "checked": True})
 notebook.get()
 notebook.delete(random.choice(list(notebook.notes.keys())))
 notebook.get()
