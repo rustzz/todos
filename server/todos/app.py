@@ -1,25 +1,23 @@
-from typing import Optional
-from fastapi import FastAPI, Request, Query, Depends, Body
+from fastapi import FastAPI
+from . import api
 from fastapi.middleware.cors import CORSMiddleware
 
-from todos.components.Notebook import Notebook
-from todos.components.User import User
+from fastapi import Depends
 
-from todos.models import User as UserModels
-from todos.models import Notebook as NotebookModels
+from .components.handlers import UserHandlers
+from .components.handlers import NotebookHandlers
 
-from todos.components import config
-from todos.components.sql import mysql_
+from .api.models import UserModels
+from .api.models import NotebookModels
+
+from .components.sql import mysql
 
 
 app = FastAPI(debug=True)
-app.title = config.app_title
-origins = [
-    "*",
-]
+app.title = api.app_title
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,71 +31,71 @@ async def root():
 
 @app.post("/am/signup")
 async def am_signup(user: UserModels.UserAuth = Depends()):
-    _user = User(mysql_, user=user)
-    return await _user.signup()
+    user_handler = UserHandlers.User(mysql, user=user)
+    return await user_handler.signup()
 
 
 @app.post("/am/signin")
 async def am_signin(user: UserModels.UserAuth = Depends()):
-    _user = User(mysql_, user=user)
-    return await _user.signin()
+    user_handler = UserHandlers.User(mysql, user=user)
+    return await user_handler.signin()
 
 
 @app.post("/notebook/add")
 async def notebook_add(user: UserModels.UserForRequests = Depends()):
-    _user = User(mysql_, user=user)
-    _notebook = Notebook(mysql_, user=user)
+    user_handler = UserHandlers.User(mysql, user=user)
+    notebook_handler = NotebookHandlers.Notebook(mysql, user=user)
 
-    if not await _user.user_exists():
+    if not await user_handler.user_exists():
         return {"status": False}
-    if not await _user.is_valid_token():
+    if not await user_handler.is_valid_token():
         return {"status": False}
-    return await _notebook.add()
+    return await notebook_handler.add()
 
 
 @app.post("/notebook/update")
 async def notebook_update(data: NotebookModels.DataNotebook, user: UserModels.UserForRequests = Depends()):
-    _user = User(mysql_, user=user)
-    _notebook = Notebook(mysql_, user=user, data=data)
+    user_handler = UserHandlers.User(mysql, user=user)
+    notebook_handler = NotebookHandlers.Notebook(mysql, user=user, data=data)
 
-    if not await _user.user_exists():
+    if not await user_handler.user_exists():
         return {"status": False}
-    if not await _user.is_valid_token():
+    if not await user_handler.is_valid_token():
         return {"status": False}
-    return await _notebook.update()
+    return await notebook_handler.update()
 
 
 @app.post("/notebook/delete")
 async def notebook_delete(data: NotebookModels.DataNotebook, user: UserModels.UserForRequests = Depends()):
-    _user = User(mysql_, user=user)
-    _notebook = Notebook(mysql_, user=user, data=data)
+    user_handler = UserHandlers.User(mysql, user=user)
+    notebook_handler = NotebookHandlers.Notebook(mysql, user=user, data=data)
             
-    if not await _user.user_exists():
+    if not await user_handler.user_exists():
         return {"status": False}
-    if not await _user.is_valid_token():
+    if not await user_handler.is_valid_token():
         return {"status": False}
-    return await _notebook.delete()
+    return await notebook_handler.delete()
 
 
 @app.post("/notebook/get")
 async def notebook_get(user: UserModels.UserForRequests = Depends()):
-    _user = User(mysql_, user=user)
-    _notebook = Notebook(mysql_, user=user)
+    user_handler = UserHandlers.User(mysql, user=user)
+    notebook_handler = NotebookHandlers.Notebook(mysql, user=user)
 
-    if not await _user.user_exists():
+    if not await user_handler.user_exists():
         return {"status": False, "reason": "Данного имени пользователя не существует"}
-    if not await _user.is_valid_token():
+    if not await user_handler.is_valid_token():
         return {"status": False, "reason": "Токен не верный"}
-    return await _notebook.get()
+    return await notebook_handler.get()
 
 
 @app.post("/am/check/token_valid")
 async def am_check_token(user: UserModels.UserForRequests = Depends()):
-    _user = User(mysql_, user=user)
-    return {"status": await _user.is_valid_token()}
+    user_handler = UserHandlers.User(mysql, user=user)
+    return {"status": await user_handler.is_valid_token()}
 
 
 @app.post("/am/check/user_exists")
 async def am_check_user_exists(user: UserModels.User = Depends()):
-    _user = User(mysql_, user=user)
-    return {"status": await _user.user_exists()}
+    user_handler = UserHandlers.User(mysql, user=user)
+    return {"status": await user_handler.user_exists()}

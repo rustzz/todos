@@ -1,6 +1,5 @@
 import hashlib
-import random
-from todos.components.fixes import fix_data
+from ..fixes import fix_data
 import uuid
 
 
@@ -10,7 +9,8 @@ class User:
         self.user = user
         return
 
-    def is_none(self, data) -> bool:
+    @staticmethod
+    def is_none(data) -> bool:
         if data is None:
             return True
         return False

@@ -10,7 +10,7 @@ Restart=always
 RestartSec=1
 User=root
 WorkingDirectory=${myPATH}
-ExecStart=/bin/bash ${myPATH}/run.sh
+ExecStart=/bin/bash ${myPATH}/scripts/run.sh
 [Install]
 WantedBy=multi-user.target"
 SERVICEFILE="/etc/systemd/system/todos.service"

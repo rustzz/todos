@@ -1,15 +1,16 @@
 import hashlib
-from todos.components.fixes import fix_data
+from ..fixes import fix_data
 
 
 class Notebook:
-    def __init__(self, connection, user, data = None) -> None:
+    def __init__(self, connection, user, data=None) -> None:
         self.connection = connection
         self.user = user
         self.data = data
         return
 
-    def is_none(self, data) -> bool:
+    @staticmethod
+    def is_none(data) -> bool:
         if data is None:
             return True
         return False
