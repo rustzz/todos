@@ -13,7 +13,7 @@ mysql_data = {
 for key in mysql_data:
     if mysql_data[key] is None:
         print(f"ENVIRONMENT '{key}' EMPTY")
-        exit()
+        exit(0)
 
 
 def connect_mysql():
