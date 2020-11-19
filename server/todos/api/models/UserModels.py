@@ -12,5 +12,5 @@ class UserAuth(User):
     password: Optional[str] = Query(None, min_length=6, max_length=64)
 
 
-class UserForRequests(User):
+class UserFunc(User):
     token: Optional[str] = Query(None, min_length=64, max_length=64)

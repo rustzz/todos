@@ -20,11 +20,11 @@ class Notebook:
             return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         conn, cursor = self.connection.connect_mysql()
         sql = "SELECT COUNT(*) FROM notes WHERE id=? AND owner=?;"
-        cursor.execute(sql, (self.data.note_id, self.user.username))
+        cursor.execute(sql, (self.data.id, self.user.username))
         result = cursor.fetchall()
         if fix_data(result[0][0]):
             sql = "DELETE FROM notes WHERE id=? AND owner=?;"
-            cursor.execute(sql, (self.data.note_id, self.user.username))
+            cursor.execute(sql, (self.data.id, self.user.username))
             conn.commit()
             conn.close()
             return {"status": True}
@@ -40,7 +40,11 @@ class Notebook:
         conn.close()
         notes = {}
         for note in result:
-            notes[note[0]] = {"title": fix_data(note[3]), "text": fix_data(note[4]), "checked": bool(fix_data(note[5]))}
+            notes[note[0]] = {
+                "title": fix_data(note[3]),
+                "text": fix_data(note[4]),
+                "checked": bool(fix_data(note[5]))
+            }
         return {"status": True, "notes": notes}
 
     async def update(self) -> dict:
@@ -54,7 +58,7 @@ class Notebook:
             self.data.text,
             self.data.checked,
             self.user.username,
-            self.data.note_id,
+            self.data.id,
         ))
         conn.commit()
         conn.close()
@@ -71,4 +75,4 @@ class Notebook:
         result = cursor.fetchall()
         conn.commit()
         conn.close()
-        return {"status": True, "note_id": fix_data(result[0][0])}
+        return {"status": True, "id": fix_data(result[0][0])}

@@ -8,10 +8,12 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=root
+User=${whoami}
 WorkingDirectory=${myPATH}
 ExecStart=/bin/bash ${myPATH}/scripts/run.sh
 [Install]
 WantedBy=multi-user.target"
-SERVICEFILE="/etc/systemd/system/todos.service"
-sudo su -c  "echo '${SERVICEDATA}' > ${SERVICEFILE}"
+SERVICEFILE="todos.service"
+
+sudo su -c "echo '${SERVICEDATA}' > /etc/systemd/system/${SERVICEFILE}"
+sudo su -c "systemctl enable ${SERVICEFILE};systemctl start ${SERVICEFILE}"

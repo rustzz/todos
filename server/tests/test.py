@@ -67,7 +67,7 @@ class Notebook:
     def delete(self, note_id):
         print("notebook delete: start")
         params = {"username": self.user.username, "token": self.user.token}
-        data = {"note_id": note_id}
+        data = {"id": note_id}
         response = requests.post(f"{host}/notebook/delete", params=params, data=json.dumps(data))
         print(f"[{response.status_code}]")
         if response.status_code == 200:
@@ -93,7 +93,7 @@ class Notebook:
         print("notebook update: start")
         params = {"username": self.user.username, "token": self.user.token}
         data = {
-            "note_id": note["note_id"], "title": note["title"],
+            "id": note["id"], "title": note["title"],
             "text": note["text"], "checked": note["checked"]
         }
         response = requests.post(f"{host}/notebook/update", params=params, data=json.dumps(data))
@@ -115,9 +115,10 @@ auth.do_signin()
 
 notebook = Notebook(auth)
 notebook.add()
+notebook.add()
 notebook.get()
 notebook.update({
-    "note_id": random.choice(list(notebook.notes.keys())),
+    "id": random.choice(list(notebook.notes.keys())),
     "text": "...",
     "title": "......",
     "checked": True

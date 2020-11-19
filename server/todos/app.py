@@ -42,7 +42,7 @@ async def am_signin(user: UserModels.UserAuth = Depends()):
 
 
 @app.post("/notebook/add")
-async def notebook_add(user: UserModels.UserForRequests = Depends()):
+async def notebook_add(user: UserModels.UserFunc = Depends()):
     user_handler = UserHandlers.User(mysql, user=user)
     notebook_handler = NotebookHandlers.Notebook(mysql, user=user)
 
@@ -54,7 +54,7 @@ async def notebook_add(user: UserModels.UserForRequests = Depends()):
 
 
 @app.post("/notebook/update")
-async def notebook_update(data: NotebookModels.DataNotebook, user: UserModels.UserForRequests = Depends()):
+async def notebook_update(data: NotebookModels.DataNotebook, user: UserModels.UserFunc = Depends()):
     user_handler = UserHandlers.User(mysql, user=user)
     notebook_handler = NotebookHandlers.Notebook(mysql, user=user, data=data)
 
@@ -66,7 +66,7 @@ async def notebook_update(data: NotebookModels.DataNotebook, user: UserModels.Us
 
 
 @app.post("/notebook/delete")
-async def notebook_delete(data: NotebookModels.DataNotebook, user: UserModels.UserForRequests = Depends()):
+async def notebook_delete(data: NotebookModels.DataNotebook, user: UserModels.UserFunc = Depends()):
     user_handler = UserHandlers.User(mysql, user=user)
     notebook_handler = NotebookHandlers.Notebook(mysql, user=user, data=data)
             
@@ -78,7 +78,7 @@ async def notebook_delete(data: NotebookModels.DataNotebook, user: UserModels.Us
 
 
 @app.post("/notebook/get")
-async def notebook_get(user: UserModels.UserForRequests = Depends()):
+async def notebook_get(user: UserModels.UserFunc = Depends()):
     user_handler = UserHandlers.User(mysql, user=user)
     notebook_handler = NotebookHandlers.Notebook(mysql, user=user)
 
@@ -90,7 +90,7 @@ async def notebook_get(user: UserModels.UserForRequests = Depends()):
 
 
 @app.post("/am/check/token_valid")
-async def am_check_token(user: UserModels.UserForRequests = Depends()):
+async def am_check_token(user: UserModels.UserFunc = Depends()):
     user_handler = UserHandlers.User(mysql, user=user)
     return {"status": await user_handler.is_valid_token()}
 

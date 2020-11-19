@@ -70,7 +70,11 @@ class User:
         conn, cursor = self.connection.connect_mysql()
         sql = "INSERT INTO users (username, password, token) VALUES (?, ?, ?);"
         token = hashlib.sha256(uuid.uuid4().hex.encode()).hexdigest()
-        cursor.execute(sql, (self.user.username, hashlib.sha256(self.user.password.encode()).hexdigest(), token))
+        cursor.execute(sql, (
+            self.user.username,
+            hashlib.sha256(self.user.password.encode()).hexdigest(),
+            token
+        ))
         conn.commit()
         conn.close()
         return {"status": True}
