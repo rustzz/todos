@@ -1,7 +1,4 @@
-from typing import Union
-
-
-def fix_data(data: Union[str, bytearray, int, bool]) -> Union[str, int, bool]:
+def fix_data(data):
     if isinstance(data, bytearray):
         return data.decode()
     return data

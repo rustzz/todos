@@ -1,5 +1,5 @@
 import mysql.connector
-import os
+import os, sys
 
 
 mysql_data = {
@@ -10,19 +10,19 @@ mysql_data = {
     "MYSQL_DB": os.getenv("MYSQL_DB")
 }
 
-for key in mysql_data:
-    if mysql_data[key] is None:
+for key, value in mysql_data.items():
+    if value is None:
         print(f"ENVIRONMENT '{key}' EMPTY")
-        exit(0)
+        sys.exit()
 
 
 def connect_mysql():
     conn = mysql.connector.connect(
-        user=mysql_data['MYSQL_USER'],
-        password=mysql_data['MYSQL_PASSWORD'],
-        host=mysql_data['MYSQL_HOST'],
-        port=mysql_data['MYSQL_PORT'],
-        database=mysql_data['MYSQL_DB']
+        user=mysql_data["MYSQL_USER"],
+        password=mysql_data["MYSQL_PASSWORD"],
+        host=mysql_data["MYSQL_HOST"],
+        port=mysql_data["MYSQL_PORT"],
+        database=mysql_data["MYSQL_DB"]
     )
     cursor = conn.cursor(prepared=True)
     return conn, cursor

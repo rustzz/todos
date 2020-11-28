@@ -3,6 +3,8 @@ import uuid
 import json
 import os
 import random
+import asyncio
+
 
 host = f"http://{os.getenv('API_SERVER_HOST')}:{os.getenv('API_SERVER_PORT')}"
 
@@ -17,7 +19,7 @@ class Auth:
         self.password = auth_data[1]
         return
 
-    def do_signup(self):
+    async def do_signup(self):
         print("signup: start")
         params = {"username": self.username, "password": self.password}
         response = requests.post(f"{host}/am/signup", params=params)
@@ -29,7 +31,7 @@ class Auth:
         print("signup: done")
         return
 
-    def do_signin(self):
+    async def do_signin(self):
         print("signin: start")
         params = {"username": self.username, "password": self.password}
         response = requests.post(f"{host}/am/signin", params=params)
@@ -51,7 +53,7 @@ class Notebook:
         self.user = user
         return
     
-    def get(self):
+    async def get(self):
         print("notebook get: start")
         params = {"username": self.user.username, "token": self.user.token}
         response = requests.post(f"{host}/notebook/get", params=params)
@@ -64,7 +66,7 @@ class Notebook:
         print("notebook get: done")
         return
 
-    def delete(self, note_id):
+    async def delete(self, note_id):
         print("notebook delete: start")
         params = {"username": self.user.username, "token": self.user.token}
         data = {"id": note_id}
@@ -77,7 +79,7 @@ class Notebook:
         print("notebook delete: done")
         return
     
-    def add(self):
+    async def add(self):
         print("notebook add: start")
         params = {"username": self.user.username, "token": self.user.token}
         response = requests.post(f"{host}/notebook/add", params=params)
@@ -89,7 +91,7 @@ class Notebook:
         print("notebook add: done")
         return
     
-    def update(self, note):
+    async def update(self, note):
         print("notebook update: start")
         params = {"username": self.user.username, "token": self.user.token}
         data = {
@@ -106,21 +108,30 @@ class Notebook:
         return
 
 
-username, password = uuid.uuid4().hex[:15], uuid.uuid4().hex
-print("auth data:", username, password)
+async def start(thread_count):
+    for _ in range(thread_count):
+        username, password = uuid.uuid4().hex[:15], uuid.uuid4().hex
+        print("auth data:", username, password)
 
-auth = Auth((username, password))
-auth.do_signup()
-auth.do_signin()
+        auth = Auth((username, password))
+        await auth.do_signup()
+        await auth.do_signin()
 
-notebook = Notebook(auth)
-notebook.add()
-notebook.add()
-notebook.get()
-notebook.update({
-    "id": random.choice(list(notebook.notes.keys())),
-    "text": "...",
-    "title": "......",
-    "checked": True
-})
-notebook.delete(random.choice(list(notebook.notes.keys())))
+        notebook = Notebook(auth)
+        await notebook.add()
+        await notebook.add()
+        await notebook.get()
+        await notebook.update({
+            "id": random.choice(list(notebook.notes.keys())),
+            "text": "...",
+            "title": "......",
+            "checked": True
+        })
+        await notebook.delete(random.choice(list(notebook.notes.keys())))
+    return
+
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    thread_count = int(input("THREADS: "))
+    loop.run_until_complete(start(thread_count))

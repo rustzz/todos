@@ -3,26 +3,22 @@ from ..fixes import fix_data
 
 
 class Notebook:
-    def __init__(self, connection, user, data=None) -> None:
-        self.connection = connection
-        self.user = user
-        self.data = data
+    def __init__(self, **kwargs) -> None:
+        self.connection = kwargs.pop("connection")
+        self.user = kwargs.pop("user")
+
+        try:
+            self.data = kwargs.pop("data")
+        except KeyError:
+            pass
         return
 
-    @staticmethod
-    def is_none(data) -> bool:
-        if data is None:
-            return True
-        return False
-
     async def delete(self) -> dict:
-        if self.is_none(self.user.username) or self.is_none(self.user.token):
-            return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         conn, cursor = self.connection.connect_mysql()
         sql = "SELECT COUNT(*) FROM notes WHERE id=? AND owner=?;"
         cursor.execute(sql, (self.data.id, self.user.username))
-        result = cursor.fetchall()
-        if fix_data(result[0][0]):
+        result = cursor.fetchone()
+        if fix_data(result[0]):
             sql = "DELETE FROM notes WHERE id=? AND owner=?;"
             cursor.execute(sql, (self.data.id, self.user.username))
             conn.commit()
@@ -31,8 +27,6 @@ class Notebook:
         return {"status": False, "reason": "Заметка не существует"}
 
     async def get(self) -> dict:
-        if self.is_none(self.user.username) or self.is_none(self.user.token):
-            return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         conn, cursor = self.connection.connect_mysql()
         sql = "SELECT * FROM notes WHERE owner=?;"
         cursor.execute(sql, (self.user.username,))
@@ -48,8 +42,6 @@ class Notebook:
         return {"status": True, "notes": notes}
 
     async def update(self) -> dict:
-        if self.is_none(self.user.username) or self.is_none(self.user.token):
-            return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         conn, cursor = self.connection.connect_mysql()
         sql = "UPDATE notes SET hash=?,title=?,text=?,checked=? WHERE owner=? AND id=?;"
         cursor.execute(sql, (
@@ -65,14 +57,12 @@ class Notebook:
         return {"status": True}
 
     async def add(self) -> dict:
-        if self.is_none(self.user.username) or self.is_none(self.user.token):
-            return {"status": False, "reason": "Одно из параметров имеет <null> тип"}
         conn, cursor = self.connection.connect_mysql()
         sql = "INSERT INTO notes (owner, parent) VALUES (?, ?);"
         cursor.execute(sql, (self.user.username, 0))
         sql = "SELECT MAX(id) FROM notes WHERE owner=?;"
         cursor.execute(sql, (self.user.username,))
-        result = cursor.fetchall()
+        result = cursor.fetchone()
         conn.commit()
         conn.close()
-        return {"status": True, "id": fix_data(result[0][0])}
+        return {"status": True, "id": fix_data(result[0])}
